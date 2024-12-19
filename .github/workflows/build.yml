@@ -1,0 +1,43 @@
+name: Deploy JHipster Application to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: ap-south-1
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Grant execute permissions to Maven Wrapper
+        run: chmod +x ./mvnw
+
+      - name: Build with Maven
+        run: ./mvnw -Pprod clean package -DskipTests
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-jar
+          path: target/monorsm-0.0.1-SNAPSHOT.jar
